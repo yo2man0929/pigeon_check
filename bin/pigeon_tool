@@ -1,0 +1,174 @@
+#!/usr/local/bin/perl
+use warnings;
+use strict;
+use Getopt::Long;
+use LWP::UserAgent;
+use Data::Dumper;
+use JSON;
+
+my $yca_role = $(yca_role);
+my $property_name = $(property_name);
+
+my @all_property = qw /
+   AdpostTW
+   AuctionsHK
+   AuctionsTW
+   BillingTW
+   Datamining-windows
+   DataMiningTW
+   DealsHK
+   ECCentralTech
+   NevecTW
+   ShoppingMall
+   Shoppingmall-windows
+   Store-TW
+/;
+
+my %tc = (
+    dk_red      => "\e[1;31m",
+    dk_green    => "\e[1;32m",
+    green       => "\e[38;5;46m",
+    white       => "\e[0;37m",
+    blue        => "\e[38;5;123m",
+    start       => "\e[1;41m",
+    start       => "\e[1;41m",
+    end         => "\e[0m",
+    yellow      => "\e[38;5;227m",
+);
+
+sub get_pigeon_endpoint(){
+    my @pigeon_tail;
+    my $url = "https://edge.dist.yahoo.com:4443/roles/v1/roles/nevec_egs_pigeon.HOSTs.prod/members?output=json" ;
+    my $ua  = LWP::UserAgent->new;
+    my $response = $ua ->get($url);
+    if ($response->is_success){
+        $response = $response->content;
+        my $status = from_json($response);
+        foreach my $sub (@$status){
+        @pigeon_tail = grep /tail/ , @{$sub->{'members'}} ;
+        }
+    return @pigeon_tail;
+    }
+}
+
+sub skip_pigeon($$$){
+    my $target_host     = shift;
+    my $queue_name      = shift;
+    my $queue_id        = shift;
+    my $yca_value       = `/home/y/bin/yca-cert-util --show $yca_role | cut -d ' ' -f 2`; chomp $yca_value;
+    my $SERVICE_URL     = "http://$target_host:4080";
+    my $ua  = LWP::UserAgent->new;
+    my $url = "$SERVICE_URL/api/pigeon/v1/messages/skip/$queue_name?msgId=$queue_id" ;
+    my @headers = (
+        'Content-Type'   => "text/plain",
+        'Accept'         => 'application/json',
+        'Yahoo-App-Auth' => $yca_value, ) ;
+    my $response = $ua->put( $url ,@headers);
+    if ($response->is_success) {
+        $response = $response->content;
+        print $tc{green} . Dumper( from_json($response)) . $tc{end} ;
+    }
+}
+
+sub show_queue(){
+    my $target_host     = shift;
+    my $property_name   = shift;
+    my $yca_value       = `/home/y/bin/yca-cert-util --show $yca_role | cut -d ' ' -f 2`; chomp $yca_value;
+    my $SERVICE_URL     = "http://$target_host:4080";
+
+    my $ua  = LWP::UserAgent->new;
+    my $url = "$SERVICE_URL/api/pigeon/v1/status?" ;
+    my @headers = (
+        'Content-Type'   => "text/plain",
+        'Accept'         => 'application/json',
+        'Yahoo-App-Auth' => $yca_value, ) ;
+    $ua->timeout(10);
+    my $response = $ua ->get($url,@headers);
+    if ($response->is_success) {
+        $response = $response->content;
+        my $status = from_json($response);
+        foreach my $sub (@{$status->{"pigeonStatus"}->{"subscriptions"}}) {
+            my $messageDelayedSeconds = $sub->{"messageDelayedSeconds"};
+            my $oldMessageCount       = $sub->{"oldMessageCount"};
+            my $subscriptionName      = $sub->{"subscriptionName"};
+            my $topicName             = $sub->{"topicName"};
+            my $oldMessages           = $sub->{"oldMessages"};
+            my $property              = $sub->{"property"};
+            if ( $oldMessageCount > 0 ) {
+                if ($property eq $property_name ) {
+                    print "$tc{blue}$target_host $property Topic:$topicName\n";
+                    print "Subscription:$subscriptionName delay $messageDelayedSeconds seconds, OldMessagesCount: $oldMessageCount\n$tc{end}";
+                    print "$tc{yellow}oldMessages list=>\n";
+                    print  "=" x 80 . "\n" . "$tc{end}";
+                    foreach (@$oldMessages) {
+                        print $tc{dk_red} . $_ . $tc{end} . "\n";
+                    }
+                    print "$tc{yellow}" . "=" x 80 . "\n" . "$tc{end}";
+                }
+            }
+        }
+    }
+}
+
+sub error_exit {
+    if (@_) {
+        print STDERR "[Error] @_\n";
+    }
+    exit(255)
+}
+
+sub run() {
+    my %args = ();
+    GetOptions (\%args,
+        "list|l",
+        "all|a",
+        "skip|k",
+        "help|h",
+        "queue|q=s" ,
+        "message|m=s" ,
+    ) or error_exit();
+
+    if ($args{help}) {
+        help();
+    }
+    elsif ($args{list} && not $args{all} && not $args{skip} ) {
+        foreach my $host (&get_pigeon_endpoint) {
+            &show_queue($host, $property_name)
+        }
+    }
+    elsif ($args{list} && $args{all} && not $args{skip})  {
+        foreach my $host (&get_pigeon_endpoint) {
+            foreach my $property (@all_property) {
+                 &show_queue($host, $property)
+            }
+        }
+    }
+    elsif ($args{skip} && $args{queue} && $args{message} && not $args{list} ) {
+        foreach my $host (&get_pigeon_endpoint){
+            &skip_pigeon($host, $args{queue},$args{message})
+        }
+    }
+    else {
+         error_exit();
+    }
+}
+
+sub help() {
+print <<EOF
+Usage: $0 [--list] [-k -q queue_name -m message_id]
+
+Options:
+    -h, --help
+        Print detailed help screen
+    -l, --list
+        List old message from all pigeon hosts
+        Ex: ./pigeon_tool -l
+        List all property old message
+        Ex: ./pigeon_tool -l -a
+    -k, --skip
+        Skip the certain queue, you also have to use -q and -m for queue_name and message_id
+        Ex: ./pigeon_tool -k -q CQI.prod.storeeps.set.action::CQO.prod.storeeps.set.action.search.merlin -m d925d129-e4e7-4602-bba4-124bf462bc5c__08959ef907109ef601
+
+EOF
+}
+&run() ;

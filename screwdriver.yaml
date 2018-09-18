@@ -1,0 +1,26 @@
+version: 1 
+platform: cpp
+
+jobs:
+    component:
+        profile: [package, publish]
+    pull-request:
+        profile: [package]
+
+shared:
+    notifications:
+        email: chia.jung.yang@oath.com
+    build_containers: [rhel6]
+    publish_containers: [rhel6]
+    steps:
+        package:
+            description: make pkg
+            command: "yinst_create -clean -target_dir ${PUBLISH_DIR} -t release pkg/*.yicf"
+        publish:
+            dist-branch: "test"
+    plugins:
+        coverage:
+            enabled: false
+        test_results:
+            enabled: false
+

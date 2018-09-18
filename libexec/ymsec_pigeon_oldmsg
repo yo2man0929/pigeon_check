@@ -1,0 +1,108 @@
+#!/usr/local/bin/perl
+use warnings;
+use strict;
+use YMS::Agent;
+use YMS::CheckResult qw(OK FAILED);
+use Getopt::Long;
+use ECSE::YMSAC;
+use JSON;
+use Digest::MD5 qw(md5_hex);
+use Data::Dumper;
+use LWP::UserAgent;
+
+
+
+sub get_pigeon_endpoint(){
+    my @pigeon_tail;
+    my $url = "https://edge.dist.yahoo.com:4443/roles/v1/roles/nevec_egs_pigeon.HOSTs.prod/members?output=json" ;
+    my $ua  = LWP::UserAgent->new;
+    my $response = $ua ->get($url);
+    if ($response->is_success){
+        $response = $response->content;
+        my $status = from_json($response);
+        foreach my $sub (@$status){
+        @pigeon_tail = grep /tail/ , @{$sub->{'members'}} ;
+        }
+    return @pigeon_tail;
+    }
+}
+
+sub call_pigeon_api(){
+    my $property_name   = shift;
+    my $yca_role        = shift;
+    my $yca_value       = `/home/y/bin/yca-cert-util --show $yca_role| cut -d ' ' -f 2`; chomp $yca_value;
+    my $status_code     = 0;
+    my @oldmsg_output;
+    my $status;
+    my $ua  = LWP::UserAgent->new;
+
+    foreach my $target_host (&get_pigeon_endpoint) {
+        my $url = "http://$target_host:4080/api/pigeon/v1/status?" ;
+        my @headers = (
+        'Content-Type' => "text/plain",
+        'Accept' => 'application/json',
+        'Yahoo-App-Auth' => $yca_value, ) ;
+        $ua->timeout(10);
+        my $response = $ua ->get($url,@headers);
+        if ($response->is_success){
+            $response = $response->content;
+            $status = from_json($response);
+            foreach my $sub (@{$status->{"pigeonStatus"}->{"subscriptions"}}) {
+                my $messageDelayedSeconds = $sub->{"messageDelayedSeconds"};
+                my $oldMessageCount       = $sub->{"oldMessageCount"};
+                my $subscriptionName      = $sub->{"subscriptionName"};
+                my $topicName             = $sub->{"topicName"};
+                my $property              = $sub->{"property"};
+                if ( $oldMessageCount > 0 ) {
+                    if ( $property eq $property_name ) {
+                    push @oldmsg_output ,"$target_host,$topicName,$subscriptionName,$messageDelayedSeconds,$oldMessageCount";
+                    $status_code = 1 ;
+                    }
+                }
+            }
+        }
+    }
+    return ($status_code, @oldmsg_output) ;
+
+}
+
+sub run() {
+    my $app_name       = "ymsec_pigeon_oldmsg";
+    my $property_name  = "UNKNOWN";
+    my $yca_role       = "yahoo.nevec.hgp-build";
+    my $dimension      = {};
+    my $metric         = {};
+    my $custom_appname;
+    my $custom_yca_role;
+    my $status_code;
+    my @output;
+    my $alert_mesg;
+    my $queue_name;
+    my $time = localtime();
+
+    GetOptions ("custom_appname=s" => \$custom_appname, "property_name=s" => \$property_name, "yca_role" => \$custom_yca_role);
+    $app_name  = (defined $custom_appname) ? $custom_appname : $app_name ;
+    $yca_role  = (defined $$custom_yca_role) ? $$custom_yca_role : $yca_role ;
+    $dimension = {"md5",md5_hex($app_name)} ;
+    ($status_code, @output) = &call_pigeon_api($property_name, $yca_role);
+
+
+    if ( $status_code eq 1 && @output) {
+        foreach my $array ( @output ) {
+            my ($target_host,$topicName,$subscriptionName,$messageDelayedSeconds,$oldMessageCount) = split(',' ,$array);
+            $subscriptionName =~ s/::/_/g ;
+            $app_name         =  "ymsec_pigeon_oldmsg" . "_" .  $subscriptionName   ;
+            $dimension        = {"md5",md5_hex($app_name)} ;
+            $status_code      = YMS::CheckResult::FAILED ;
+            $alert_mesg       = "Failed. $target_host $property_name Topic:$topicName Subscription:$subscriptionName delay $messageDelayedSeconds seconds, OldMessagesCount: $oldMessageCount" ;
+            YMSAC->send_message_to_yamas($app_name, $alert_mesg, $status_code, $dimension, $metric, $time);
+        }
+    } else {
+        $alert_mesg  = "OK" ;
+        $status_code = YMS::CheckResult::OK ;
+        YMSAC->send_message_to_yamas($app_name, $alert_mesg, $status_code, $dimension, $metric, $time);
+    }
+
+
+}
+&run();
