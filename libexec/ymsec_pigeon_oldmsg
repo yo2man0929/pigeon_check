@@ -98,7 +98,7 @@ sub run() {
     }elsif ( $status_code == 1 && @output) {
         foreach my $list ( @output ) {
             my ($target_host,$topicName,$subscriptionName,$messageDelayedSeconds,$oldMessageCount) = @$list;
-            $subscriptionName =~ s/::/_/g ;
+            $subscriptionName =~ s/(::|\.)/_/g ;
             $app_name         =  "ymsec_pigeon_oldmsg" . "_" .  $subscriptionName   ;
             $dimension        = {"md5",md5_hex($app_name)} ;
             $status_code      = YMS::CheckResult::FAILED ;
