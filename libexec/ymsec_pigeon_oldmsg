@@ -98,7 +98,7 @@ sub run() {
         YMSAC->send_message_to_yamas($app_name, $alert_mesg, $status_code, $dimension, $metric, $time);
     }elsif ( $status_code == 1 && @output) {
         foreach my $list ( @output ) {
-            my ($target_host,$topicName,$subscriptionName,$messageDelayedSeconds,$oldMessageCount) = @$list[0,1,2,3,4];
+            my ($target_host,$topicName,$subscriptionName,$messageDelayedSeconds,$oldMessageCount) = @$list;
             $subscriptionName =~ s/::/_/g ;
             $app_name         =  "ymsec_pigeon_oldmsg" . "_" .  $subscriptionName   ;
             $dimension        = {"md5",md5_hex($app_name)} ;
