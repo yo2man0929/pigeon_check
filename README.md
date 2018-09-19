@@ -30,12 +30,11 @@
        tags:
            namespace: BillingTW
        args:
-         - --custom_appname=pigeon_oldmsg_tail
          - --property_name=BillingTW
-         - --custom_yca_role=yahoo.nevec.hgp-build
+         - --yca_role=yahoo.nevec.hgp-build
 
 ### onboard Yams
     Please refer to the link.
-    https://git.ouroath.com/cyang02/nevectw_yamas2_config/blob/master/rules/pigeon_300.yo
+    https://git.ouroath.com/ecse/nevectw_yamas2_config/blob/master/rules/pigeon_300.yo
 ---
-[![Build Status](http://api.screwdriver.corp.yahoo.com:4080/badge/310418/component/icon)](http://api.screwdriver.corp.yahoo.com:4080/badge/310418/component/target)
+[![Build Status](https://api.screwdriver.corp.yahoo.com:4443/badge/310418/component/icon)](https://api.screwdriver.corp.yahoo.com:4443/badge/310418/component/target)

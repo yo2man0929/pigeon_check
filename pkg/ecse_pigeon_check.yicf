@@ -12,12 +12,12 @@ OWNER = root
 GROUP = wheel
 
 ###YINST settings
-YINST set property_name NevecTW
-YINST set yca_role yahoo.nevec.hgp-build
+YINST set property_name 
+YINST set yca_role 
 
-YINST bug-product Asia EC Service Engineering
+YINST bug-product jira-NEVEC 
 YINST bug-component Generic
 
-c 0755 ymon users  bin/oldmsgtool bin/oldmsgtool expand overwrite
+c 0755 ymon users  bin/pigeon_tool bin/pigeon_tool expand overwrite
 g 0755 ymon users  libexec/yms/ libexec/* 
 
