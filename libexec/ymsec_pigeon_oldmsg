@@ -60,8 +60,7 @@ sub call_pigeon_api(){
                         push @array, $subscriptionName;
                         push @array, $messageDelayedSeconds;
                         push @array, $oldMessageCount;
-                        my $list = \@array;
-                        push @oldmsg_output ,$list;
+                        push @oldmsg_output ,\@array;
                         $status_code = 1 ;
                     }
                 }
