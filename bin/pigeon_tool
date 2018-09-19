@@ -156,18 +156,19 @@ sub run() {
 sub help() {
 print <<EOF
 
-Usage: $0 [-l][-a] 
-          [-k -q queue_name -m message_id]
-          [-h]
+Usage: 
+       $0 [-l][-a] 
+       $0 [-k -q queue_name -m message_id]
+       $0 [-h]
 Options:
     -h, --help
         Print detailed help screen
     -l, --list
-        List old message from your property.   Ex: $0 -l
-        List old message from all propertye.   Ex: $0 -l -a
+        List old message from your property.   Eg: $0 -l
+        List old message from all propertye.   Eg: $0 -l -a
     -k, --skip
         Skip the certain queue, you also have to use -q and -m for queue_name and message_id
-        Ex: $0 -k -q CQI.prod.storeeps.set.action::CQO.prod.storeeps.set.action.search.merlin -m d925d129-e4e7-4602-bba4-124bf462bc5c__08959ef907109ef601
+        Eg: $0 -k -q CQI.prod.storeeps.set.action::CQO.prod.storeeps.set.action.search.merlin -m d925d129-e4e7-4602-bba4-124bf462bc5c__08959ef907109ef601
 
 EOF
 }
