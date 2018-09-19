@@ -1,0 +1,23 @@
+PRODUCT_NAME = ecse_pigeon_check
+RELEASE_LINE = 1.0
+VERSION = `auto_increment_version.pl $(PRODUCT_NAME) $(RELEASE_LINE)`
+SHORT_DESC = `cat README.md | head -1`
+LONG_DESC = `cat README.md`
+CUSTODIAN = chia.jung.yang@oath.com 
+
+SRCDIRS = .
+PACKAGE_OS_SPECIFIC = no
+PERM  = 0444
+OWNER = root
+GROUP = wheel
+
+###YINST settings
+YINST set property_name 
+YINST set yca_role 
+
+YINST bug-product jira-NEVEC 
+YINST bug-component Generic
+
+c 0755 ymon users  bin/pigeon_tool bin/pigeon_tool expand overwrite
+g 0755 ymon users  libexec/yms/ libexec/* 
+
