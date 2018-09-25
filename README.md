@@ -37,4 +37,4 @@
     Please refer to the link.
     https://git.ouroath.com/ecse/nevectw_yamas2_config/blob/master/rules/pigeon_300.yo
 ---
-[![Build Status](https://api.screwdriver.corp.yahoo.com:4443/badge/310418/component/icon)](https://api.screwdriver.corp.yahoo.com:4443/badge/310418/component/target)
+[![Build Status](https://api.screwdriver.corp.yahoo.com:4443/badge/310646/component/icon)](https://api.screwdriver.corp.yahoo.com:4443/badge/310646/component/target)
