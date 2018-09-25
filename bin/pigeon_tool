@@ -6,8 +6,8 @@ use LWP::UserAgent;
 use Data::Dumper;
 use JSON;
 
-my $yca_role = $(yca_role);
-my $property_name = $(property_name);
+my $yca_role = "$(yca_role)";
+my $property_name = "$(property_name)";
 
 my @all_property = qw /
    AdpostTW
