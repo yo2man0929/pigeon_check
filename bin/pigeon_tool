@@ -107,6 +107,8 @@ sub show_queue(){
                 }
             }
         }
+    } else {
+        print "API connection failed or your setting is wrong"
     }
 }
 
