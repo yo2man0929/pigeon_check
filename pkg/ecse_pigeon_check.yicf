@@ -14,6 +14,7 @@ GROUP = wheel
 ###YINST settings
 YINST set property_name 
 YINST set yca_role 
+YINST set deploy_hosts 
 
 YINST bug-product jira-NEVEC 
 YINST bug-component Generic

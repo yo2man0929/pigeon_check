@@ -9,7 +9,10 @@ use JSON;
 use Digest::MD5 qw(md5_hex);
 use Data::Dumper;
 use LWP::UserAgent;
+use Sys::Hostname;
 
+my $list = "$(deploy_hosts)" ;
+my @deploy_hosts = split /,/, $list;
 
 sub get_pigeon_endpoint(){
     my @pigeon_tail;
@@ -84,9 +87,19 @@ sub run() {
     my $time = localtime();
     my $yca_role;
 
+
     GetOptions ( "property_name=s" => \$property_name, "yca_role=s" => \$yca_role);
     $dimension = {"md5",md5_hex($app_name)} ;
-    ($status_code, @output) = &call_pigeon_api($property_name, $yca_role);
+    if (@deploy_hosts) {
+        my $hostname = hostname;
+        if (grep /$hostname/ ,@deploy_hosts) {
+            ($status_code, @output) = &call_pigeon_api($property_name, $yca_role);
+        }else {
+            $status_code = 3;
+        }
+    }else{
+            ($status_code, @output) = &call_pigeon_api($property_name, $yca_role);
+    }
     if ($status_code == 2) {
         $alert_mesg       = "Fail to connect to pigeon API. Please make sure pigeon is being deployed now or network is with no problems" ;
         $status_code      = YMS::CheckResult::OK ;
