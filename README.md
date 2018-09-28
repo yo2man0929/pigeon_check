@@ -3,6 +3,7 @@
 
 - YINST set property_name NevecTW
 - YINST set yca_role yahoo.nevec.hgp-build
+- YINST set deploy_hosts uther1.srch.ect.tw1.yahoo.com,uther1.srch.ect.tp2.yahoo.com 
 
 ### oldmsgtool
 
