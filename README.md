@@ -30,9 +30,6 @@
        user: ymon
        tags:
            namespace: BillingTW
-       args:
-         - --property_name=BillingTW
-         - --yca_role=yahoo.nevec.hgp-build
 
 ### onboard Yams
     Please refer to the link.
