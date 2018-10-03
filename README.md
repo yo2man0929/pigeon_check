@@ -21,15 +21,6 @@
  CQI.prod.storeeps.set.action::CQO.prod.storeeps.set.action.search.merlin
 -m d925d129-e4e7-4602-bba4-124bf462bc5c__08959ef907109ef601
 
-### ymsec_pigeon_oldmsg
-
-
-     - id: billing_pigeon_old_message
-       interval: 300
-       check: /home/y/libexec/yms/ymsec_pigeon_oldmsg
-       user: ymon
-       tags:
-           namespace: BillingTW
 
 ### onboard Yams
     Please refer to the link.

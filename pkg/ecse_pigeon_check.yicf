@@ -14,11 +14,9 @@ GROUP = wheel
 ###YINST settings
 YINST set property_name 
 YINST set yca_role 
-YINST set deploy_hosts 
 
 YINST bug-product jira-NEVEC 
 YINST bug-component Generic
 
 c 0755 ymon users  bin/pigeon_tool bin/pigeon_tool                                      expand overwrite
-c 0755 ymon users  libexec/yms/ymsec_pigeon_oldmsg libexec/ymsec_pigeon_oldmsg          expand overwrite 
 
