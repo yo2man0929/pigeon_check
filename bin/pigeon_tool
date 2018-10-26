@@ -67,9 +67,9 @@ sub skip_pigeon($$$){
     if ($response->is_success) {
         $response = $response->content;
         print $tc{green} . Dumper( from_json($response)) . $tc{end} ;
-     }else {
+    }else {
         print "Fail to skip, check yca setting or network setting\n"
-     }
+    }
 }
 
 sub show_queue(){
