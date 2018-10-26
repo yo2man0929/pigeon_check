@@ -180,6 +180,8 @@ Options:
     -l, --list
         List old message from your property.   Eg: $0 -l
         List old message from all propertye.   Eg: $0 -l -a
+    -u --url 
+        List the splunk url for checking the payload of msgid
     -k, --skip
         Skip the certain queue, you also have to use -q and -m for queue_name and message_id
         Eg: $0 -k -q CQI.prod.storeeps.set.action::CQO.prod.storeeps.set.action.search.merlin -m d925d129-e4e7-4602-bba4-124bf462bc5c__08959ef907109ef601
