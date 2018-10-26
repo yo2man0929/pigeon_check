@@ -67,12 +67,15 @@ sub skip_pigeon($$$){
     if ($response->is_success) {
         $response = $response->content;
         print $tc{green} . Dumper( from_json($response)) . $tc{end} ;
-    }
+     }else {
+        print "Fail to skip, check yca setting or network setting\n"
+     }
 }
 
 sub show_queue(){
     my $target_host     = shift;
     my $property_name   = shift;
+    my $splunk            = shift;
     my $yca_value       = `/home/y/bin/yca-cert-util --show $yca_role | cut -d ' ' -f 2`; chomp $yca_value;
     my $SERVICE_URL     = "http://$target_host:4080";
 
@@ -96,12 +99,16 @@ sub show_queue(){
             my $property              = $sub->{"property"};
             if ( $oldMessageCount > 0 ) {
                 if ($property eq $property_name ) {
-                    print "$tc{blue}$target_host $property Topic:$topicName\n";
-                    print "Subscription:$subscriptionName delay $messageDelayedSeconds seconds, OldMessagesCount: $oldMessageCount\n$tc{end}";
+                    print "$tc{blue}$target_host $property Topic:$topicName\n$tc{end}";
+                    print "Subscription:$tc{dk_red}$subscriptionName$tc{end} delay $messageDelayedSeconds seconds, OldMessagesCount: $oldMessageCount\n";
                     print "$tc{yellow}oldMessages list=>\n";
                     print  "=" x 80 . "\n" . "$tc{end}";
                     foreach (@$oldMessages) {
                         print $tc{dk_red} . $_ . $tc{end} . "\n";
+                        if ($splunk == 1 ){
+                            $_ =~ s/([^_]+)__\w+/$1/ ;
+                            print "https://splunk.nevec.yahoo.com:9999/en-US/app/search/search?q=search%20index%3D%20nevec-pigeon-headtocms_log%20topic%3D" . $topicName . "%20msgId%3D" . $_ . "&display.page.search.mode=smart&dispatch.sample_ratio=1&earliest=-7d%40h&lates\n";
+                        }
                     }
                     print "$tc{yellow}" . "=" x 80 . "\n" . "$tc{end}";
                 }
@@ -128,20 +135,25 @@ sub run() {
         "help|h",
         "queue|q=s" ,
         "message|m=s" ,
+        "url|u",
     ) or error_exit();
 
     if ($args{help}) {
         help();
+    }elsif ($args{url}) {
+        foreach my $host (&get_pigeon_endpoint) {
+             &show_queue($host, $property_name, 1)
+        }
     }
     elsif ($args{list} && not $args{all} && not $args{skip} ) {
         foreach my $host (&get_pigeon_endpoint) {
-            &show_queue($host, $property_name)
+            &show_queue($host, $property_name, 0)
         }
     }
     elsif ($args{list} && $args{all} && not $args{skip})  {
         foreach my $host (&get_pigeon_endpoint) {
             foreach my $property (@all_property) {
-                 &show_queue($host, $property)
+                 &show_queue($host, $property, 0)
             }
         }
     }
@@ -158,8 +170,8 @@ sub run() {
 sub help() {
 print <<EOF
 
-Usage: 
-       $0 [-l][-a] 
+Usage:
+       $0 [-l][-a]
        $0 [-k -q queue_name -m message_id]
        $0 [-h]
 Options:
