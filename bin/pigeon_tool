@@ -75,7 +75,7 @@ sub skip_pigeon($$$){
 sub show_queue(){
     my $target_host     = shift;
     my $property_name   = shift;
-    my $splunk            = shift;
+    my $splunk          = shift;
     my $yca_value       = `/home/y/bin/yca-cert-util --show $yca_role | cut -d ' ' -f 2`; chomp $yca_value;
     my $SERVICE_URL     = "http://$target_host:4080";
 
