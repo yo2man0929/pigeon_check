@@ -108,7 +108,7 @@ sub show_queue(){
                         print $tc{dk_red} . $_ . $tc{end} . "\n";
                         if ($splunk == 1 ){
                             $_ =~ s/([^_]+)__\w+/$1/ ;
-                            print "https://splunk.nevec.yahoo.com:9999/en-US/app/search/search?q=search%20index%3D%20nevec-pigeon-headtocms_log%20topic%3D" . $topicName . "%20msgId%3D" . $_ . "&display.page.search.mode=smart&dispatch.sample_ratio=1&earliest=-7d%40h&lates\n";
+                            print "https://splunk.nevec.yahoo.com:9999/en-US/app/search/search?q=search%20index%3D%20nevec-pigeon-headtocms_log%20topic%3D" . $topicName . "%20msgId%3D" . $_ . "&display.page.search.mode=smart&dispatch.sample_ratio=1&earliest=-7d%40h&latest=now\n";
                         }
                     }
                     print "$tc{yellow}" . "=" x 80 . "\n" . "$tc{end}";
