@@ -6,8 +6,8 @@ use LWP::UserAgent;
 use Data::Dumper;
 use JSON;
 
-my $yca_role = "$(yca_role)";
-my $property_name = "$(property_name)";
+my $yca_role = "yahoo.nevec.hgp-build";
+my $property_name = "NevecTW";
 
 my @all_property = qw /
    AdpostTW
@@ -67,9 +67,9 @@ sub skip_pigeon($$$){
     if ($response->is_success) {
         $response = $response->content;
         print $tc{green} . Dumper( from_json($response)) . $tc{end} ;
-    }else {
+     }else {
         print "Fail to skip, check yca setting or network setting\n"
-    }
+     }
 }
 
 sub show_queue(){
@@ -140,20 +140,24 @@ sub run() {
 
     if ($args{help}) {
         help();
-    }elsif ($args{url}) {
-        foreach my $host (&get_pigeon_endpoint) {
-             &show_queue($host, $property_name, 1)
-        }
     }
     elsif ($args{list} && not $args{all} && not $args{skip} ) {
         foreach my $host (&get_pigeon_endpoint) {
-            &show_queue($host, $property_name, 0)
+            if ($args{url}) {
+                &show_queue($host, $property_name, 1)
+            }else {
+                &show_queue($host, $property_name, 0)
+            }
         }
     }
     elsif ($args{list} && $args{all} && not $args{skip})  {
         foreach my $host (&get_pigeon_endpoint) {
             foreach my $property (@all_property) {
-                 &show_queue($host, $property, 0)
+                if ($args{url}) {
+                    &show_queue($host, $property, 1)
+                }else {
+                    &show_queue($host, $property, 0)
+                }
             }
         }
     }
@@ -180,8 +184,6 @@ Options:
     -l, --list
         List old message from your property.   Eg: $0 -l
         List old message from all propertye.   Eg: $0 -l -a
-    -u --url 
-        List the splunk url for checking the payload of msgid
     -k, --skip
         Skip the certain queue, you also have to use -q and -m for queue_name and message_id
         Eg: $0 -k -q CQI.prod.storeeps.set.action::CQO.prod.storeeps.set.action.search.merlin -m d925d129-e4e7-4602-bba4-124bf462bc5c__08959ef907109ef601
