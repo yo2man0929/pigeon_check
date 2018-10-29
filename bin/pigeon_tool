@@ -9,6 +9,7 @@ use JSON;
 my $yca_role = "$(yca_role)";
 my $property_name = "$(property_name)";
 
+
 my @all_property = qw /
    AdpostTW
    AuctionsHK
@@ -138,26 +139,19 @@ sub run() {
         "url|u",
     ) or error_exit();
 
+    my $splunk = $args{url} ? 1 : 0;
     if ($args{help}) {
         help();
     }
     elsif ($args{list} && not $args{all} && not $args{skip} ) {
         foreach my $host (&get_pigeon_endpoint) {
-            if ($args{url}) {
-                &show_queue($host, $property_name, 1)
-            }else {
-                &show_queue($host, $property_name, 0)
-            }
+                &show_queue($host, $property_name, $splunk)
         }
     }
     elsif ($args{list} && $args{all} && not $args{skip})  {
         foreach my $host (&get_pigeon_endpoint) {
             foreach my $property (@all_property) {
-                if ($args{url}) {
-                    &show_queue($host, $property, 1)
-                }else {
-                    &show_queue($host, $property, 0)
-                }
+                    &show_queue($host, $property, $splunk)
             }
         }
     }
@@ -184,7 +178,7 @@ Options:
     -l, --list
         List old message from your property.   Eg: $0 -l
         List old message from all propertye.   Eg: $0 -l -a
-        List old message from your property with splunk searching url Eg: $0 -l -u 
+        List old message from your property with splunk searching url Eg: $0 -l -u
         List old message from all property with splunk searching url Eg: $0 -l -a -u
     -k, --skip
         Skip the certain queue, you also have to use -q and -m for queue_name and message_id
