@@ -68,9 +68,8 @@ sub skip_pigeon($$$){
     if ($response->is_success) {
         $response = $response->content;
         print $tc{green} . Dumper( from_json($response)) . $tc{end} ;
-     }else {
-        print "Fail to skip, check yca setting or network setting\n"
-     }
+        return 1;
+    }
 }
 
 sub show_queue(){
@@ -128,6 +127,8 @@ sub error_exit {
 }
 
 sub run() {
+    my $query_record;
+    my $tag = 0;
     my %args = ();
     GetOptions (\%args,
         "list|l",
@@ -157,7 +158,14 @@ sub run() {
     }
     elsif ($args{skip} && $args{queue} && $args{message} && not $args{list} ) {
         foreach my $host (&get_pigeon_endpoint){
-            &skip_pigeon($host, $args{queue},$args{message})
+            $query_record = &skip_pigeon($host, $args{queue},$args{message});
+            # save request status
+            if ($query_record ==  1){
+                $tag = 1;
+            }
+        }
+        if ($tag == 0){
+            print "Fail to skip, check yca setting or network setting\n"
         }
     }
     else {
