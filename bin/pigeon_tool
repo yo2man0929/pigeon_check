@@ -128,7 +128,6 @@ sub error_exit {
 
 sub run() {
     my $query_record;
-    my $tag = 0;
     my %args = ();
     GetOptions (\%args,
         "list|l",
@@ -160,11 +159,9 @@ sub run() {
         foreach my $host (&get_pigeon_endpoint){
             $query_record = &skip_pigeon($host, $args{queue},$args{message});
             # save request status
-            if ($query_record ==  1){
-                $tag = 1;
-            }
+            last if ($query_record ==  1);
         }
-        if ($tag == 0){
+        if ($query_record == 0){
             print "Fail to skip, check yca setting or network setting\n"
         }
     }
