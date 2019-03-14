@@ -116,7 +116,7 @@ sub show_queue(){
             }
         }
     } else {
-        print "API connection failed or your setting is wrong"
+        print "$target_host : API connection failed or your setting is wrong or the host is being deployed\n"
     }
 }
 
